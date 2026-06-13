@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import {
   Scissors, Phone, MapPin, Clock, Instagram, Menu, X,
-  SprayCan, Droplets, Sparkles, Palette, Wind, Eye, Star, MessageCircle, ArrowDown, Play,
+  SprayCan, Droplets, Sparkles, Palette, Wind, Eye, Star, MessageCircle, ArrowDown, Play, Navigation,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import hero from "@/assets/hero.jpg";
@@ -571,34 +571,78 @@ const galleryAspects = ["aspect-[3/4]", "aspect-square", "aspect-[4/5]", "aspect
 function VideoCard({ src }: { src: string }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
+  const [poster, setPoster] = useState<string>();
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
+
+    let captured = false;
+    const captureFrame = () => {
+      if (captured || !video.videoWidth || !video.videoHeight) return;
+      captured = true;
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) return;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      setPoster(canvas.toDataURL("image/jpeg", 0.85));
+    };
+    const onLoadedMetadata = () => {
+      try {
+        video.currentTime = Math.min(0.5, (video.duration || 1) / 2);
+      } catch {
+        captureFrame();
+      }
+    };
+    const onSeeked = () => captureFrame();
     const onPlay = () => {
       setPlaying(true);
       document.querySelectorAll("video").forEach((other) => {
-        if (other !== video) other.pause();
+        if (other !== video) {
+          other.pause();
+          other.currentTime = 0;
+        }
       });
     };
     const onPause = () => setPlaying(false);
+
+    video.addEventListener("loadedmetadata", onLoadedMetadata);
+    video.addEventListener("seeked", onSeeked);
     video.addEventListener("play", onPlay);
     video.addEventListener("pause", onPause);
+    // `loadedmetadata` may have already fired before this listener attached (cached/local assets).
+    if (video.readyState >= 1) onLoadedMetadata();
     return () => {
+      video.removeEventListener("loadedmetadata", onLoadedMetadata);
+      video.removeEventListener("seeked", onSeeked);
       video.removeEventListener("play", onPlay);
       video.removeEventListener("pause", onPause);
     };
   }, []);
 
+  const handlePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = false;
+    video.play();
+  };
+
   return (
     <div className="relative block aspect-[3/4] w-full overflow-hidden break-inside-avoid bg-card">
-      <video ref={videoRef} src={src} controls muted loop playsInline preload="metadata" className="h-full w-full object-cover" />
+      <video ref={videoRef} src={src} poster={poster} controls loop playsInline preload="metadata" className="h-full w-full object-cover" />
       {!playing && (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/70 via-black/10 to-black/40">
+        <button
+          type="button"
+          onClick={handlePlay}
+          aria-label="Videoyu sesli oynat"
+          className="absolute inset-0 flex h-full w-full items-center justify-center bg-gradient-to-t from-black/70 via-black/10 to-black/40"
+        >
           <div className="flex h-14 w-14 items-center justify-center rounded-full bg-foreground/90">
             <Play className="h-6 w-6 fill-background text-background" />
           </div>
-        </div>
+        </button>
       )}
     </div>
   );
@@ -686,7 +730,7 @@ function Contact() {
         referrerPolicy="no-referrer-when-downgrade"
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
-      <Reveal className="absolute inset-x-0 bottom-0 px-6 py-12 sm:px-10 sm:py-16 lg:px-16">
+      <Reveal className="pointer-events-none absolute inset-x-0 bottom-0 px-6 py-12 sm:px-10 sm:py-16 lg:px-16">
         <SectionTitle kicker="İletişim" title="Bize Ulaşın" align="left" />
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           <InfoRow Icon={MapPin} title="Adres" lines={["Hacıhalil, 1208. Sk.", "41400 Gebze / Kocaeli"]} />
@@ -694,12 +738,23 @@ function Contact() {
           <InfoRow Icon={Instagram} title="Instagram" lines={["@kafadarerkekkuaforu"]} href="https://www.instagram.com/kafadarerkekkuaforu/" />
           <InfoRow Icon={MessageCircle} title="WhatsApp" lines={[PHONE]} href={WA_URL} />
         </div>
-        <div className="mt-10 inline-flex flex-wrap items-center gap-4 border border-primary/30 bg-background/70 px-6 py-4 backdrop-blur">
-          <Clock className="h-5 w-5 text-primary" />
-          <span className="text-sm font-semibold text-foreground">Pzt - Cmt: 09:00 - 21:00</span>
-          <span className="text-foreground/30">/</span>
-          <span className="text-sm text-foreground/50">Pazar Kapalı</span>
-          <OpenBadge />
+        <div className="mt-10 flex flex-wrap items-center gap-4">
+          <div className="inline-flex flex-wrap items-center gap-4 border border-primary/30 bg-background/70 px-6 py-4 backdrop-blur">
+            <Clock className="h-5 w-5 text-primary" />
+            <span className="text-sm font-semibold text-foreground">Pzt - Cmt: 09:00 - 21:00</span>
+            <span className="text-foreground/30">/</span>
+            <span className="text-sm text-foreground/50">Pazar Kapalı</span>
+            <OpenBadge />
+          </div>
+          <a
+            href="https://www.google.com/maps/dir/?api=1&destination=40.795953,29.4344909"
+            target="_blank"
+            rel="noreferrer"
+            className="pointer-events-auto inline-flex items-center gap-2 bg-primary px-6 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-primary-foreground transition hover:opacity-90"
+            style={{ boxShadow: "var(--shadow-glow)" }}
+          >
+            <Navigation className="h-4 w-4" /> Yol Tarifi Al
+          </a>
         </div>
       </Reveal>
     </section>
@@ -718,7 +773,7 @@ function InfoRow({ Icon, title, lines, href }: { Icon: typeof Phone; title: stri
   );
   const cls = "flex items-start gap-3 transition-colors hover:text-primary";
   return href ? (
-    <a href={href} target="_blank" rel="noreferrer" className={cls}>{content}</a>
+    <a href={href} target="_blank" rel="noreferrer" className={`pointer-events-auto ${cls}`}>{content}</a>
   ) : (
     <div className={cls}>{content}</div>
   );
