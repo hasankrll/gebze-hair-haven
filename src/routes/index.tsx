@@ -1,20 +1,29 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Scissors, Phone, MapPin, Clock, Instagram, Menu, X,
-  SprayCan, Droplets, Sparkles, Palette, Wind, Eye, Star,
+  SprayCan, Droplets, Sparkles, Palette, Wind, Eye, Star, MessageCircle,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import hero from "@/assets/hero.jpg";
 import team1 from "@/assets/team-1.jpg";
 import team2 from "@/assets/team-2.jpg";
 import team3 from "@/assets/team-3.jpg";
+import g0 from "@/assets/gallery/unnamed.webp.asset.json";
+import g1 from "@/assets/gallery/unnamed_1.webp.asset.json";
+import g2 from "@/assets/gallery/unnamed_2.webp.asset.json";
+import g3 from "@/assets/gallery/unnamed_3.webp.asset.json";
+import g4 from "@/assets/gallery/unnamed_4.webp.asset.json";
+import g5 from "@/assets/gallery/unnamed_5.webp.asset.json";
+import g6 from "@/assets/gallery/unnamed_6.webp.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Kafadar Erkek Kuaförü — Gebze'nin Adresi" },
-      { name: "description", content: "Gebze Hacıhalil'de profesyonel erkek kuaförü. Saç, sakal, cilt bakımı. 0538 371 50 57" },
+      { title: "Kafadar Erkek Kuaförü | Gebze Erkek Kuaförü" },
+      { name: "description", content: "Gebze'nin en iyi erkek kuaförü. Saç kesimi, sakal, fön ve daha fazlası. Randevu için WhatsApp: 0538 371 50 57" },
+      { property: "og:title", content: "Kafadar Erkek Kuaförü | Gebze Erkek Kuaförü" },
+      { property: "og:description", content: "Gebze'nin en iyi erkek kuaförü. Saç kesimi, sakal, fön ve daha fazlası. Randevu için WhatsApp: 0538 371 50 57" },
     ],
   }),
   component: Home,
@@ -22,24 +31,27 @@ export const Route = createFileRoute("/")({
 
 const PHONE = "0538 371 50 57";
 const WHATSAPP = "905383715057";
+const WA_URL = `https://wa.me/${WHATSAPP}`;
+
+const galleryImages = [g0.url, g1.url, g2.url, g3.url, g4.url, g5.url, g6.url];
 
 const services = [
-  { name: "Saç Kesimi", price: "200₺", Icon: Scissors },
-  { name: "Sakal Kesimi / Düzeltme", price: "150₺", Icon: SprayCan },
-  { name: "Fön", price: "100₺", Icon: Wind },
-  { name: "Saç Yıkama", price: "100₺", Icon: Droplets },
-  { name: "Saç + Sakal Kombo", price: "300₺", Icon: Star },
-  { name: "Ense Düzeltme", price: "75₺", Icon: Scissors },
-  { name: "Kaş Düzeltme", price: "75₺", Icon: Eye },
-  { name: "Cilt Bakımı / Maske", price: "250₺", Icon: Sparkles },
-  { name: "Saç Boyama", price: "400₺", Icon: Palette },
-  { name: "Keratin / Röfle", price: "500₺", Icon: Sparkles },
+  { name: "Saç Kesimi", desc: "Modern ve klasik saç kesim teknikleri.", Icon: Scissors },
+  { name: "Sakal Kesimi / Düzeltme", desc: "Yüz hatlarınıza uygun profesyonel sakal şekillendirme.", Icon: SprayCan },
+  { name: "Fön", desc: "Saçınıza ideal form ve hacim.", Icon: Wind },
+  { name: "Saç Yıkama", desc: "Özel şampuanlarla rahatlatıcı yıkama.", Icon: Droplets },
+  { name: "Saç + Sakal Kombo", desc: "Tek seansta tam bakım deneyimi.", Icon: Star },
+  { name: "Ense Düzeltme", desc: "Temiz ve keskin ense hattı.", Icon: Scissors },
+  { name: "Kaş Düzeltme", desc: "Hassas ve doğal kaş şekillendirme.", Icon: Eye },
+  { name: "Cilt Bakımı / Maske", desc: "Cildinizi canlandıran profesyonel bakım.", Icon: Sparkles },
+  { name: "Saç Boyama", desc: "Kaliteli ürünlerle uzun ömürlü renk.", Icon: Palette },
+  { name: "Keratin / Röfle", desc: "İleri seviye saç bakım uygulamaları.", Icon: Sparkles },
 ];
 
 const team = [
-  { name: "Mert Arslan", role: "Kurucu Usta", img: team1 },
+  { name: "Mert Arslan", role: "Saç & Sakal Uzmanı", img: team1 },
   { name: "Ahmet", role: "Saç & Sakal Uzmanı", img: team2 },
-  { name: "Erhan", role: "Stil Danışmanı", img: team3 },
+  { name: "Erhan", role: "Saç & Sakal Uzmanı", img: team3 },
 ];
 
 const nav = [
@@ -49,6 +61,22 @@ const nav = [
   { href: "#galeri", label: "Galeri" },
   { href: "#iletisim", label: "İletişim" },
 ];
+
+function useOpenStatus() {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const compute = () => {
+      const now = new Date();
+      const day = now.getDay(); // 0 Sun
+      const h = now.getHours();
+      setOpen(day !== 0 && h >= 9 && h < 21);
+    };
+    compute();
+    const t = setInterval(compute, 60000);
+    return () => clearInterval(t);
+  }, []);
+  return open;
+}
 
 function Home() {
   const [open, setOpen] = useState(false);
@@ -62,7 +90,24 @@ function Home() {
       <Gallery />
       <Contact />
       <Footer />
+      <WhatsAppFab />
     </div>
+  );
+}
+
+function OpenBadge({ className = "" }: { className?: string }) {
+  const isOpen = useOpenStatus();
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
+        isOpen
+          ? "bg-green-500/15 text-green-400 border border-green-500/40"
+          : "bg-red-500/15 text-red-400 border border-red-500/40"
+      } ${className}`}
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${isOpen ? "bg-green-400" : "bg-red-400"} animate-pulse`} />
+      {isOpen ? "Bugün Müsaitiz ✓" : "Şu An Kapalıyız"}
+    </span>
   );
 }
 
@@ -84,8 +129,9 @@ function Navbar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => voi
           ))}
         </nav>
         <div className="flex items-center gap-2">
+          <OpenBadge className="hidden lg:inline-flex" />
           <a
-            href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Merhaba, randevu almak istiyorum.")}`}
+            href={`${WA_URL}?text=${encodeURIComponent("Merhaba, randevu almak istiyorum.")}`}
             target="_blank" rel="noreferrer"
             className="hidden sm:inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-elegant hover:opacity-90 transition"
           >
@@ -104,8 +150,9 @@ function Navbar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => voi
                 {n.label}
               </a>
             ))}
+            <OpenBadge />
             <a
-              href={`https://wa.me/${WHATSAPP}`}
+              href={WA_URL}
               className="sm:hidden inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
             >
               Randevu Al
@@ -114,6 +161,32 @@ function Navbar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => voi
         </div>
       )}
     </header>
+  );
+}
+
+function BarberPole({ className = "" }: { className?: string }) {
+  return (
+    <div className={`relative ${className}`} aria-hidden>
+      <div className="relative h-56 w-14 sm:h-72 sm:w-16 rounded-full overflow-hidden border-2 border-white/20 shadow-2xl">
+        {/* Caps */}
+        <div className="absolute inset-x-0 top-0 h-4 bg-gradient-to-b from-zinc-300 to-zinc-500 z-10" />
+        <div className="absolute inset-x-0 bottom-0 h-4 bg-gradient-to-t from-zinc-300 to-zinc-500 z-10" />
+        {/* Stripes */}
+        <div
+          className="absolute inset-0 animate-barber-spin"
+          style={{
+            backgroundImage:
+              "repeating-linear-gradient(45deg, #ffffff 0 14px, #ef4444 14px 28px, #ffffff 28px 42px, #1e40af 42px 56px)",
+            backgroundSize: "100% 56px",
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20" />
+      </div>
+      <style>{`
+        @keyframes barber-spin { from { background-position: 0 0; } to { background-position: 0 -56px; } }
+        .animate-barber-spin { animation: barber-spin 1.6s linear infinite; }
+      `}</style>
+    </div>
   );
 }
 
@@ -126,9 +199,12 @@ function Hero() {
       </div>
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 sm:py-32 lg:py-44 grid lg:grid-cols-[1.4fr_1fr] gap-12 items-center">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary mb-6">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-            Gebze • Hacıhalil
+          <div className="flex flex-wrap items-center gap-3 mb-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+              Gebze • Hacıhalil
+            </div>
+            <OpenBadge />
           </div>
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.05]">
             Kafadar <br />
@@ -139,7 +215,7 @@ function Hero() {
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <a
-              href={`https://wa.me/${WHATSAPP}?text=${encodeURIComponent("Merhaba, randevu almak istiyorum.")}`}
+              href={`${WA_URL}?text=${encodeURIComponent("Merhaba, randevu almak istiyorum.")}`}
               target="_blank" rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-base font-semibold text-primary-foreground hover:scale-[1.02] transition"
               style={{ boxShadow: "var(--shadow-glow)" }}
@@ -154,11 +230,15 @@ function Hero() {
             </a>
           </div>
         </div>
-        <div className="hidden lg:flex justify-center">
+        <div className="hidden lg:flex justify-center items-center gap-8">
+          <BarberPole />
           <div className="relative">
             <div className="absolute inset-0 rounded-full bg-primary/30 blur-3xl" />
-            <img src={logo} alt="Kafadar logo" className="relative h-72 w-72 object-contain bg-white/95 rounded-full p-6 shadow-elegant" />
+            <img src={logo} alt="Kafadar logo" className="relative h-64 w-64 object-contain bg-white/95 rounded-full p-6 shadow-elegant" />
           </div>
+        </div>
+        <div className="lg:hidden flex justify-center">
+          <BarberPole />
         </div>
       </div>
     </section>
@@ -183,13 +263,11 @@ function Services() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {services.map((s) => (
             <div key={s.name} className="group relative bg-card border border-border rounded-xl p-6 hover:border-primary/50 hover:shadow-elegant transition-all">
-              <div className="flex items-start justify-between gap-3">
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-colors">
-                  <s.Icon className="h-6 w-6 text-primary group-hover:text-primary-foreground transition-colors" />
-                </div>
-                <span className="font-display font-bold text-2xl text-primary">{s.price}</span>
+              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-colors">
+                <s.Icon className="h-6 w-6 text-primary group-hover:text-primary-foreground transition-colors" />
               </div>
               <h3 className="mt-5 font-semibold text-lg">{s.name}</h3>
+              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
             </div>
           ))}
         </div>
@@ -231,7 +309,7 @@ function Appointment() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const msg = `Merhaba, randevu almak istiyorum.%0A%0AAd Soyad: ${form.name}%0ATelefon: ${form.phone}%0AHizmet: ${form.service}%0ATarih & Saat: ${form.datetime}`;
-    window.open(`https://wa.me/${WHATSAPP}?text=${msg}`, "_blank");
+    window.open(`${WA_URL}?text=${msg}`, "_blank");
   };
 
   return (
@@ -279,19 +357,61 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function Gallery() {
+  const photos = galleryImages.slice(0, 6);
   return (
     <section id="galeri" className="py-20 sm:py-28 bg-muted/40">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionTitle kicker="Galeri" title="Çalışmalarımız" sub="Yakında eklenecek." />
+        <SectionTitle kicker="Galeri" title="Çalışmalarımız" sub="Salonumuzdan ve işlerimizden kareler." />
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="aspect-square rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 border border-border flex items-center justify-center">
-              <div className="text-center text-muted-foreground">
-                <Scissors className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <span className="text-xs font-medium">Yakında Eklenecek</span>
+          {photos.map((src, i) => (
+            <a
+              key={i}
+              href={src}
+              target="_blank"
+              rel="noreferrer"
+              className="group aspect-square overflow-hidden rounded-xl border border-border bg-card block"
+            >
+              <img
+                src={src}
+                alt={`Kafadar Kuaförü galeri ${i + 1}`}
+                loading="lazy"
+                className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+            </a>
+          ))}
+        </div>
+
+        {/* Instagram feed */}
+        <div className="mt-16">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center">
+                <Instagram className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h3 className="font-display font-bold text-xl">Instagram'da Biz</h3>
+                <p className="text-sm text-muted-foreground">@kafadarerkekkuaforu</p>
               </div>
             </div>
-          ))}
+            <a
+              href="https://www.instagram.com/kafadarerkekkuaforu/"
+              target="_blank" rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white px-5 py-2.5 text-sm font-semibold hover:opacity-90 transition"
+            >
+              <Instagram className="h-4 w-4" /> Takip Et
+            </a>
+          </div>
+          <div className="rounded-2xl overflow-hidden border border-border bg-card">
+            <iframe
+              title="Instagram @kafadarerkekkuaforu"
+              src="https://www.instagram.com/kafadarerkekkuaforu/embed"
+              className="w-full"
+              style={{ height: 720, border: 0 }}
+              loading="lazy"
+              scrolling="no"
+              allowTransparency
+            />
+          </div>
         </div>
       </div>
     </section>
@@ -303,17 +423,37 @@ function Contact() {
     <section id="iletisim" className="py-20 sm:py-28 bg-background">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <SectionTitle kicker="İletişim" title="Bize Ulaşın" />
+
+        {/* Featured hours block */}
+        <div className="mb-10 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 sm:p-8 shadow-elegant">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+            <div className="h-16 w-16 shrink-0 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
+              <Clock className="h-8 w-8 text-primary-foreground" />
+            </div>
+            <div className="flex-1">
+              <div className="flex flex-wrap items-center gap-3">
+                <h3 className="font-display font-bold text-2xl">Çalışma Saatleri</h3>
+                <OpenBadge />
+              </div>
+              <div className="mt-3 grid sm:grid-cols-2 gap-2 text-base">
+                <p className="font-semibold"><span className="text-primary">Pazartesi - Cumartesi:</span> 09:00 - 21:00</p>
+                <p className="font-semibold"><span className="text-primary">Pazar:</span> Kapalı</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="grid lg:grid-cols-2 gap-8">
           <div className="space-y-5">
             <InfoRow Icon={MapPin} title="Adres" lines={["Hacıhalil, 1208. Sk.", "41400 Gebze / Kocaeli"]} />
             <InfoRow Icon={Phone} title="Telefon" lines={[PHONE]} href={`tel:${PHONE.replace(/\s/g, "")}`} />
-            <InfoRow Icon={Clock} title="Çalışma Saatleri" lines={["Pazartesi - Cumartesi: 09:00 - 21:00", "Pazar: Kapalı"]} />
             <InfoRow Icon={Instagram} title="Instagram" lines={["@kafadarerkekkuaforu"]} href="https://www.instagram.com/kafadarerkekkuaforu/" />
+            <InfoRow Icon={MessageCircle} title="WhatsApp" lines={[PHONE]} href={WA_URL} />
           </div>
           <div className="rounded-2xl overflow-hidden border border-border shadow-elegant h-[400px] lg:h-auto min-h-[400px]">
             <iframe
               title="Kafadar Kuaförü Konumu"
-              src="https://www.google.com/maps?q=40.795953,29.4344909&hl=tr&z=16&output=embed"
+              src="https://www.google.com/maps?q=40.795953,29.4344909&hl=tr&z=17&output=embed"
               className="h-full w-full"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
@@ -342,6 +482,23 @@ function InfoRow({ Icon, title, lines, href }: { Icon: typeof Phone; title: stri
     <a href={href} target="_blank" rel="noreferrer" className={cls}>{content}</a>
   ) : (
     <div className={cls}>{content}</div>
+  );
+}
+
+function WhatsAppFab() {
+  return (
+    <a
+      href={WA_URL}
+      target="_blank"
+      rel="noreferrer"
+      aria-label="WhatsApp ile iletişime geç"
+      className="fixed bottom-5 right-5 z-50 group"
+    >
+      <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-40" />
+      <span className="relative flex items-center justify-center h-14 w-14 rounded-full bg-green-500 text-white shadow-2xl hover:scale-110 transition-transform">
+        <MessageCircle className="h-7 w-7" fill="currentColor" />
+      </span>
+    </a>
   );
 }
 
