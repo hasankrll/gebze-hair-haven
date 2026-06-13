@@ -86,8 +86,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:locale", content: "tr_TR" },
       { name: "twitter:title", content: "Kafadar Erkek Kuaförü | Gebze'nin En İyi Berberi" },
       { name: "twitter:description", content: "Gebze Hacıhalil'de profesyonel saç kesimi, sakal tıraşı ve bakım hizmetleri. Pazartesi-Cumartesi 09:00-21:00 arası hizmetinizdeyiz. Randevu için WhatsApp: 0538 371 50 57" },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ac97a60f-97d8-4b05-8bdc-3675ce170526/id-preview-f2458cd9--6e7ea5d8-f206-4bf0-b534-d1ca625da1d9.lovable.app-1781317871978.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ac97a60f-97d8-4b05-8bdc-3675ce170526/id-preview-f2458cd9--6e7ea5d8-f206-4bf0-b534-d1ca625da1d9.lovable.app-1781317871978.png" },
+      { property: "og:image", content: "https://kafadarkuafor.xyz/og-image.png" },
+      { name: "twitter:image", content: "https://kafadarkuafor.xyz/og-image.png" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
