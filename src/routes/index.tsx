@@ -214,20 +214,19 @@ function Hero() {
             Erkek bakımında Gebze'nin adresi. Klasik ustalık, modern tarz.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
-            <a
-              href={`${WA_URL}?text=${encodeURIComponent("Merhaba, randevu almak istiyorum.")}`}
-              target="_blank" rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-base font-semibold text-primary-foreground hover:scale-[1.02] transition"
-              style={{ boxShadow: "var(--shadow-glow)" }}
-            >
-              <Phone className="h-4 w-4" /> Randevu Al
-            </a>
-            <a
-              href="#hizmetler"
-              className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 backdrop-blur px-7 py-3.5 text-base font-semibold text-white hover:bg-white/10 transition"
-            >
-              Hizmetlerimiz
-            </a>
+          <a
+            href="#randevu"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-base font-semibold text-primary-foreground hover:scale-[1.02] transition"
+            style={{ boxShadow: "var(--shadow-glow)" }}
+          >
+            <Phone className="h-4 w-4" /> Randevu Al
+          </a>
+          <a
+            href="#hizmetler"
+            className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 backdrop-blur px-7 py-3.5 text-base font-semibold text-white hover:bg-white/10 transition"
+          >
+            Hizmetlerimiz
+          </a>
           </div>
         </div>
         <div className="hidden lg:flex justify-center items-center gap-8">
