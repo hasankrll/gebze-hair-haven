@@ -131,8 +131,7 @@ function Navbar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => voi
         <div className="flex items-center gap-2">
           <OpenBadge className="hidden lg:inline-flex" />
           <a
-            href={`${WA_URL}?text=${encodeURIComponent("Merhaba, randevu almak istiyorum.")}`}
-            target="_blank" rel="noreferrer"
+            href="#randevu"
             className="hidden sm:inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-elegant hover:opacity-90 transition"
           >
             Randevu Al
@@ -152,7 +151,8 @@ function Navbar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => voi
             ))}
             <OpenBadge />
             <a
-              href={WA_URL}
+              href="#randevu"
+              onClick={() => setOpen(false)}
               className="sm:hidden inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
             >
               Randevu Al
@@ -214,20 +214,19 @@ function Hero() {
             Erkek bakımında Gebze'nin adresi. Klasik ustalık, modern tarz.
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
-            <a
-              href={`${WA_URL}?text=${encodeURIComponent("Merhaba, randevu almak istiyorum.")}`}
-              target="_blank" rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-base font-semibold text-primary-foreground hover:scale-[1.02] transition"
-              style={{ boxShadow: "var(--shadow-glow)" }}
-            >
-              <Phone className="h-4 w-4" /> Randevu Al
-            </a>
-            <a
-              href="#hizmetler"
-              className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 backdrop-blur px-7 py-3.5 text-base font-semibold text-white hover:bg-white/10 transition"
-            >
-              Hizmetlerimiz
-            </a>
+          <a
+            href="#randevu"
+            className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-base font-semibold text-primary-foreground hover:scale-[1.02] transition"
+            style={{ boxShadow: "var(--shadow-glow)" }}
+          >
+            <Phone className="h-4 w-4" /> Randevu Al
+          </a>
+          <a
+            href="#hizmetler"
+            className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 backdrop-blur px-7 py-3.5 text-base font-semibold text-white hover:bg-white/10 transition"
+          >
+            Hizmetlerimiz
+          </a>
           </div>
         </div>
         <div className="hidden lg:flex justify-center items-center gap-8">
@@ -500,20 +499,57 @@ function InfoRow({ Icon, title, lines, href }: { Icon: typeof Phone; title: stri
   );
 }
 
+const whatsappBarbers = [
+  { name: "Mert Arslan", wa: "905396913384" },
+  { name: "Ahmet", wa: "905383715057" },
+  { name: "Erhan", wa: "905383715057" },
+];
+
 function WhatsAppFab() {
+  const [show, setShow] = useState(false);
   return (
-    <a
-      href={WA_URL}
-      target="_blank"
-      rel="noreferrer"
-      aria-label="WhatsApp ile iletişime geç"
-      className="fixed bottom-5 right-5 z-50 group"
-    >
-      <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-40" />
-      <span className="relative flex items-center justify-center h-14 w-14 rounded-full bg-green-500 text-white shadow-2xl hover:scale-110 transition-transform">
-        <MessageCircle className="h-7 w-7" fill="currentColor" />
-      </span>
-    </a>
+    <>
+      <button
+        onClick={() => setShow(true)}
+        aria-label="WhatsApp ile iletişime geç"
+        className="fixed bottom-5 right-5 z-50 group cursor-pointer"
+      >
+        <span className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-40" />
+        <span className="relative flex items-center justify-center h-14 w-14 rounded-full bg-green-500 text-white shadow-2xl hover:scale-110 transition-transform">
+          <MessageCircle className="h-7 w-7" fill="currentColor" />
+        </span>
+      </button>
+      {show && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60" onClick={() => setShow(false)}>
+          <div className="relative w-full max-w-sm mx-4 rounded-2xl border border-border bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setShow(false)}
+              className="absolute right-4 top-4 p-1 rounded-md hover:bg-muted transition"
+              aria-label="Kapat"
+            >
+              <X className="h-5 w-5 text-muted-foreground" />
+            </button>
+            <h3 className="text-lg font-bold text-foreground pr-8">Berberinizi Seçin</h3>
+            <p className="text-sm text-muted-foreground mt-1">Tercih ettiğiniz berberle WhatsApp üzerinden iletişime geçin.</p>
+            <div className="mt-5 flex flex-col gap-3">
+              {whatsappBarbers.map((b) => (
+                <a
+                  key={b.name}
+                  href={`https://wa.me/${b.wa}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() => setShow(false)}
+                  className="flex items-center justify-between rounded-xl border border-border bg-background px-5 py-3.5 text-sm font-semibold hover:border-primary/50 hover:bg-primary/5 transition"
+                >
+                  <span>{b.name}</span>
+                  <span className="text-xs text-muted-foreground font-medium">WhatsApp</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
