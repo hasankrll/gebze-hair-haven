@@ -9,13 +9,6 @@ import hero from "@/assets/hero.jpg";
 import team1 from "@/assets/team-1.jpg";
 import team2 from "@/assets/team-2.jpg";
 import team3 from "@/assets/team-3.jpg";
-import g0 from "@/assets/gallery/unnamed.webp.asset.json";
-import g1 from "@/assets/gallery/unnamed_1.webp.asset.json";
-import g2 from "@/assets/gallery/unnamed_2.webp.asset.json";
-import g3 from "@/assets/gallery/unnamed_3.webp.asset.json";
-import g4 from "@/assets/gallery/unnamed_4.webp.asset.json";
-import g5 from "@/assets/gallery/unnamed_5.webp.asset.json";
-import g6 from "@/assets/gallery/unnamed_6.webp.asset.json";
 import buzzCutsVideo from "@/assets/gallery/buzz-cuts.mp4";
 import randevuVideo1 from "@/assets/gallery/randevu-1.mp4";
 import randevuVideo2 from "@/assets/gallery/randevu-2.mp4";
@@ -39,7 +32,14 @@ const PHONE = "0538 371 50 57";
 const WHATSAPP = "905383715057";
 const WA_URL = `https://wa.me/${WHATSAPP}`;
 
-const galleryImages = [g0.url, g1.url, g2.url, g3.url, g4.url, g5.url, g6.url];
+const galleryImages = [
+  "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=600",
+  "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=600",
+  "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=600",
+  "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600",
+  "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600",
+  "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=600",
+];
 const galleryVideos = [buzzCutsVideo, randevuVideo1, randevuVideo2, randevuVideo3, randevuVideo4, randevuVideo5];
 
 const services = [
@@ -267,28 +267,6 @@ function Navbar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => voi
   );
 }
 
-function BarberPole({ className = "" }: { className?: string }) {
-  return (
-    <div className={`relative ${className}`} aria-hidden>
-      <div className="relative h-56 w-14 sm:h-72 sm:w-16 rounded-full overflow-hidden border-2 border-white/20 shadow-2xl">
-        {/* Caps */}
-        <div className="absolute inset-x-0 top-0 h-4 bg-gradient-to-b from-zinc-300 to-zinc-500 z-10" />
-        <div className="absolute inset-x-0 bottom-0 h-4 bg-gradient-to-t from-zinc-300 to-zinc-500 z-10" />
-        {/* Stripes */}
-        <div
-          className="absolute inset-0 animate-barber-spin"
-          style={{
-            backgroundImage:
-              "repeating-linear-gradient(45deg, #ffffff 0 14px, #ef4444 14px 28px, #ffffff 28px 42px, #1e40af 42px 56px)",
-            backgroundSize: "100% 56px",
-          }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20" />
-      </div>
-    </div>
-  );
-}
-
 function Hero() {
   return (
     <section id="top" className="relative flex h-screen min-h-[680px] flex-col overflow-hidden bg-background">
@@ -309,8 +287,8 @@ function Hero() {
         </div>
 
         {/* Center content */}
-        <div className="max-w-xl">
-          <div className="flex flex-wrap items-center gap-3 mb-8">
+        <div className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left">
+          <div className="mb-8 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
             <div className="inline-flex items-center gap-2 border border-primary/40 px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.3em] text-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
               Gebze • Hacıhalil
@@ -325,11 +303,11 @@ function Hero() {
             </span>
           </h1>
 
-          <p className="mt-8 text-base sm:text-lg text-foreground/60 max-w-md leading-relaxed">
+          <p className="mx-auto mt-8 max-w-md text-base sm:text-lg text-foreground/60 leading-relaxed lg:mx-0">
             Erkek bakımında Gebze'nin adresi. Klasik ustalık, modern tarz.
           </p>
 
-          <div className="mt-10 flex flex-wrap gap-4">
+          <div className="mt-10 flex flex-wrap justify-center gap-4 lg:justify-start">
             <a
               href="#randevu"
               className="inline-flex items-center gap-2 bg-primary px-8 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-primary-foreground transition hover:opacity-90"
@@ -346,18 +324,13 @@ function Hero() {
           </div>
         </div>
 
-        {/* Logo + spinning barber pole */}
-        <div className="hidden lg:flex flex-col items-center gap-10">
+        {/* Logo */}
+        <div className="hidden lg:flex items-center justify-center">
           <div className="relative">
             <div className="absolute inset-0 rounded-full bg-primary/20 blur-3xl" />
             <img src={logo} alt="Kafadar logo" className="relative h-40 w-40 object-contain rounded-full bg-foreground/95 p-6 shadow-elegant" />
           </div>
-          <BarberPole />
         </div>
-      </div>
-
-      <div className="relative lg:hidden flex justify-center pb-10">
-        <BarberPole />
       </div>
 
       {/* Thin gold divider */}
@@ -488,7 +461,7 @@ function Appointment() {
   };
 
 
-  const underline = "w-full border-0 border-b border-[#0a0a0a]/20 bg-transparent px-0 py-3 text-base text-[#0a0a0a] outline-none transition-colors focus:border-primary";
+  const underline = "w-full border-0 border-b border-[#0f0b08]/20 bg-transparent px-0 py-3 text-base text-[#0f0b08] outline-none transition-colors focus:border-primary";
 
   return (
     <section id="randevu" className="bg-background">
@@ -559,7 +532,7 @@ function Appointment() {
 function UnderlineField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs font-bold uppercase tracking-[0.25em] text-[#0a0a0a]/50">{label}</span>
+      <span className="mb-2 block text-xs font-bold uppercase tracking-[0.25em] text-[#0f0b08]/50">{label}</span>
       {children}
     </label>
   );
@@ -649,31 +622,24 @@ function VideoCard({ src }: { src: string }) {
 }
 
 function Gallery() {
-  const photos = galleryImages.slice(0, 5);
   return (
     <section id="galeri" className="bg-background py-24 sm:py-32">
       <div className="mx-auto max-w-[1600px] px-6 sm:px-10 lg:px-16">
         <SectionTitle kicker="Galeri" title="Çalışmalarımız" sub="Salonumuzdan ve işlerimizden kareler." />
         <Reveal delay={150}>
           <div className="columns-2 gap-4 sm:columns-3 lg:columns-4 [&>*]:mb-4">
-            {photos.map((src, i) => (
-              <a
+            {galleryImages.map((src, i) => (
+              <div
                 key={i}
-                href={src}
-                target="_blank"
-                rel="noreferrer"
-                className={`group relative block w-full overflow-hidden break-inside-avoid bg-card ${galleryAspects[i % galleryAspects.length]}`}
+                className={`block w-full overflow-hidden break-inside-avoid bg-card ${galleryAspects[i % galleryAspects.length]}`}
               >
                 <img
                   src={src}
                   alt={`Kafadar Kuaförü galeri ${i + 1}`}
                   loading="lazy"
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="h-full w-full object-cover"
                 />
-                <div className="absolute inset-0 flex items-center justify-center bg-background/0 transition-colors duration-500 group-hover:bg-background/50">
-                  <Eye className="h-6 w-6 text-foreground opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                </div>
-              </a>
+              </div>
             ))}
             {galleryVideos.map((src, i) => (
               <VideoCard key={`video-${i}`} src={src} />
