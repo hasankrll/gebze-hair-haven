@@ -30,6 +30,9 @@ export const Route = createFileRoute("/")({
       { property: "og:title", content: "Kafadar Erkek Kuaförü | Gebze Erkek Kuaförü" },
       { property: "og:description", content: "Gebze'nin en iyi erkek kuaförü. Saç kesimi, sakal, fön ve daha fazlası. Randevu için WhatsApp: 0538 371 50 57" },
     ],
+    scripts: [
+      { src: "https://elfsightcdn.com/platform.js", async: true },
+    ],
   }),
   component: Home,
 });
@@ -190,6 +193,7 @@ function Home() {
       <Team />
       <Appointment />
       <Gallery />
+      <Reviews />
       <Contact />
       <Footer />
       <WhatsAppFab />
@@ -703,6 +707,21 @@ function Gallery() {
               scrolling="no"
               allowTransparency
             />
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
+function Reviews() {
+  return (
+    <section id="yorumlar" className="bg-card py-24 sm:py-32">
+      <div className="mx-auto max-w-[1600px] px-6 sm:px-10 lg:px-16">
+        <SectionTitle kicker="Google Yorumları" title="Müşteri Yorumlarımız" sub="Bizi tercih eden müşterilerimizin deneyimleri." />
+        <Reveal delay={150}>
+          <div className="border border-primary/20 bg-background p-2 sm:p-6">
+            <div className="elfsight-app-1f235655-2cfa-4d8c-9b8d-52ab542c59ab" data-elfsight-app-lazy />
           </div>
         </Reveal>
       </div>
