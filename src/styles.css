@@ -36,31 +36,31 @@
   --radius: 0.25rem;
 
   /* Premium fashion-brand palette */
-  --background: #0f0b08;
+  --background: #1a1612;
   --foreground: #f5f5f0;
 
-  --card: #1a1410;
+  --card: #2a2018;
   --card-foreground: #f5f5f0;
-  --popover: #1a1410;
+  --popover: #2a2018;
   --popover-foreground: #f5f5f0;
 
   --primary: #c9a96e;
-  --primary-foreground: #0f0b08;
+  --primary-foreground: #1a1612;
 
-  --secondary: #1a1410;
+  --secondary: #2a2018;
   --secondary-foreground: #f5f5f0;
 
-  --muted: #1a1410;
+  --muted: #2a2018;
   --muted-foreground: #a3a39c;
 
   --accent: #c9a96e;
-  --accent-foreground: #0f0b08;
+  --accent-foreground: #1a1612;
 
   --destructive: oklch(0.6 0.2 25);
   --destructive-foreground: #f5f5f0;
 
   --border: #232320;
-  --input: #1a1410;
+  --input: #2a2018;
   --ring: #c9a96e;
 
   --gold: #c9a96e;

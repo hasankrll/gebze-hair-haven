@@ -69,20 +69,42 @@ const nav = [
   { href: "#iletisim", label: "İletişim" },
 ];
 
-function useOpenStatus() {
-  const [open, setOpen] = useState(false);
+type BadgeColor = "green" | "red" | "orange";
+
+const badgeStyles: Record<BadgeColor, string> = {
+  green: "bg-green-500/15 text-green-400 border border-green-500/40",
+  red: "bg-red-500/15 text-red-400 border border-red-500/40",
+  orange: "bg-orange-500/15 text-orange-400 border border-orange-500/40",
+};
+
+const badgeDotStyles: Record<BadgeColor, string> = {
+  green: "bg-green-400",
+  red: "bg-red-400",
+  orange: "bg-orange-400",
+};
+
+function useOpenStatus(): { color: BadgeColor; label: string } {
+  const [status, setStatus] = useState<{ color: BadgeColor; label: string }>({ color: "green", label: "Bugün Müsaitiz ✓" });
   useEffect(() => {
     const compute = () => {
       const now = new Date();
-      const day = now.getDay(); // 0 Sun
+      const day = now.getDay(); // 0 Sun ... 6 Sat
       const h = now.getHours();
-      setOpen(day !== 0 && h >= 9 && h < 21);
+      if (day === 0) {
+        setStatus({ color: "red", label: "Yarın Pazartesi Açıyoruz • 09:00" });
+      } else if (h < 9) {
+        setStatus({ color: "orange", label: "Bugün 09:00'da Açıyoruz" });
+      } else if (h >= 21) {
+        setStatus({ color: "orange", label: "Yarın 09:00'da Açıyoruz" });
+      } else {
+        setStatus({ color: "green", label: "Bugün Müsaitiz ✓" });
+      }
     };
     compute();
     const t = setInterval(compute, 60000);
     return () => clearInterval(t);
   }, []);
-  return open;
+  return status;
 }
 
 function useScrolled(threshold = 40) {
@@ -174,17 +196,13 @@ function Home() {
 }
 
 function OpenBadge({ className = "" }: { className?: string }) {
-  const isOpen = useOpenStatus();
+  const { color, label } = useOpenStatus();
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${
-        isOpen
-          ? "bg-green-500/15 text-green-400 border border-green-500/40"
-          : "bg-red-500/15 text-red-400 border border-red-500/40"
-      } ${className}`}
+      className={`items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${badgeStyles[color]} ${className}`}
     >
-      <span className={`h-1.5 w-1.5 rounded-full ${isOpen ? "bg-green-400" : "bg-red-400"} animate-pulse`} />
-      {isOpen ? "Bugün Müsaitiz ✓" : "Şu An Kapalıyız"}
+      <span className={`h-1.5 w-1.5 rounded-full ${badgeDotStyles[color]} animate-pulse`} />
+      {label}
     </span>
   );
 }
@@ -252,7 +270,7 @@ function Navbar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => voi
                 {n.label}
               </a>
             ))}
-            <OpenBadge className="w-fit" />
+            <OpenBadge className="inline-flex w-fit" />
             <a
               href="#randevu"
               onClick={() => setOpen(false)}
@@ -276,6 +294,16 @@ function Hero() {
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/85 to-background/60" />
       </div>
 
+      {/* Mobile-only directions link in the empty space below the navbar */}
+      <a
+        href="https://www.google.com/maps/dir/?api=1&destination=40.795953,29.4344909"
+        target="_blank"
+        rel="noreferrer"
+        className="absolute right-6 top-24 z-10 inline-flex items-center gap-1.5 border border-primary/50 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.2em] text-primary lg:hidden"
+      >
+        📍 Yol Tarifi Al
+      </a>
+
       <div className="relative flex-1 mx-auto w-full max-w-[1700px] px-6 sm:px-10 lg:px-16 grid lg:grid-cols-[auto_1fr_auto] items-center gap-10 pt-28 pb-12">
         {/* Giant vertical wordmark */}
         <div
@@ -293,7 +321,7 @@ function Hero() {
               <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
               Gebze • Hacıhalil
             </div>
-            <OpenBadge />
+            <OpenBadge className="inline-flex" />
           </div>
 
           <h1 className="font-display font-black leading-[0.95] text-foreground text-7xl sm:text-8xl lg:text-6xl xl:text-7xl">
@@ -461,7 +489,7 @@ function Appointment() {
   };
 
 
-  const underline = "w-full border-0 border-b border-[#0f0b08]/20 bg-transparent px-0 py-3 text-base text-[#0f0b08] outline-none transition-colors focus:border-primary";
+  const underline = "w-full border-0 border-b border-[#1a1612]/20 bg-transparent px-0 py-3 text-base text-[#1a1612] outline-none transition-colors focus:border-primary";
 
   return (
     <section id="randevu" className="bg-background">
@@ -483,7 +511,7 @@ function Appointment() {
               <p className="mt-2 text-lg text-foreground">Hacıhalil, 1208. Sk. 41400 Gebze / Kocaeli</p>
             </div>
           </div>
-          <OpenBadge className="mt-10 w-fit" />
+          <OpenBadge className="inline-flex mt-10 w-fit" />
         </Reveal>
 
         {/* Light form panel */}
@@ -532,7 +560,7 @@ function Appointment() {
 function UnderlineField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-2 block text-xs font-bold uppercase tracking-[0.25em] text-[#0f0b08]/50">{label}</span>
+      <span className="mb-2 block text-xs font-bold uppercase tracking-[0.25em] text-[#1a1612]/50">{label}</span>
       {children}
     </label>
   );
@@ -710,7 +738,7 @@ function Contact() {
             <span className="text-sm font-semibold text-foreground">Pzt - Cmt: 09:00 - 21:00</span>
             <span className="text-foreground/30">/</span>
             <span className="text-sm text-foreground/50">Pazar Kapalı</span>
-            <OpenBadge />
+            <OpenBadge className="inline-flex" />
           </div>
           <a
             href="https://www.google.com/maps/dir/?api=1&destination=40.795953,29.4344909"
