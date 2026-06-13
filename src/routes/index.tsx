@@ -50,8 +50,8 @@ const services = [
 
 const team = [
   { name: "Mert Arslan", role: "Saç & Sakal Uzmanı", img: team1 },
-  { name: "Ahmet", role: "Saç & Sakal Uzmanı", img: team2 },
-  { name: "Erhan", role: "Saç & Sakal Uzmanı", img: team3 },
+  { name: "Ahmet Karataş", role: "Saç & Sakal Uzmanı", img: team2 },
+  { name: "Erhan Karadağ", role: "Saç & Sakal Uzmanı", img: team3 },
 ];
 
 const nav = [
@@ -305,8 +305,8 @@ function Team() {
 const barbers = [
   { name: "Fark etmez", wa: "905383715057" },
   { name: "Mert Arslan", wa: "905396913384" },
-  { name: "Ahmet", wa: "905383715057" },
-  { name: "Erhan", wa: "905383715057" },
+  { name: "Ahmet Karadağ", wa: "905383715057" },
+  { name: "Erhan Karataş", wa: "905383715057" },
 ];
 
 function Appointment() {
@@ -504,8 +504,8 @@ function InfoRow({ Icon, title, lines, href }: { Icon: typeof Phone; title: stri
 
 const whatsappBarbers = [
   { name: "Mert Arslan", wa: "905396913384" },
-  { name: "Ahmet", wa: "905383715057" },
-  { name: "Erhan", wa: "905383715057" },
+  { name: "Ahmet Karataş", wa: "905383715057" },
+  { name: "Erhan Karadağ", wa: "905383715057" },
 ];
 
 function WhatsAppFab() {
