@@ -131,8 +131,7 @@ function Navbar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => voi
         <div className="flex items-center gap-2">
           <OpenBadge className="hidden lg:inline-flex" />
           <a
-            href={`${WA_URL}?text=${encodeURIComponent("Merhaba, randevu almak istiyorum.")}`}
-            target="_blank" rel="noreferrer"
+            href="#randevu"
             className="hidden sm:inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-elegant hover:opacity-90 transition"
           >
             Randevu Al
@@ -152,7 +151,8 @@ function Navbar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => voi
             ))}
             <OpenBadge />
             <a
-              href={WA_URL}
+              href="#randevu"
+              onClick={() => setOpen(false)}
               className="sm:hidden inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
             >
               Randevu Al
