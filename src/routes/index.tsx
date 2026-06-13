@@ -303,14 +303,23 @@ function Team() {
   );
 }
 
+const barbers = [
+  { name: "Fark etmez", wa: "905383715057" },
+  { name: "Mert Arslan", wa: "905396913384" },
+  { name: "Ahmet", wa: "905383715057" },
+  { name: "Erhan", wa: "905383715057" },
+];
+
 function Appointment() {
-  const [form, setForm] = useState({ name: "", phone: "", service: services[0].name, datetime: "" });
+  const [form, setForm] = useState({ name: "", phone: "", service: services[0].name, datetime: "", barber: barbers[0].name });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const msg = `Merhaba, randevu almak istiyorum.%0A%0AAd Soyad: ${form.name}%0ATelefon: ${form.phone}%0AHizmet: ${form.service}%0ATarih & Saat: ${form.datetime}`;
-    window.open(`${WA_URL}?text=${msg}`, "_blank");
+    const target = barbers.find((b) => b.name === form.barber) ?? barbers[0];
+    const text = `Merhaba! 👋\n\n*${form.datetime}* tarihinde *${form.service}* için randevu almak istiyorum.\n\nAd Soyad: ${form.name}\n\nMüsait misiniz?`;
+    window.open(`https://wa.me/${target.wa}?text=${encodeURIComponent(text)}`, "_blank");
   };
+
 
   return (
     <section id="randevu" className="py-20 sm:py-28 bg-background">
@@ -331,6 +340,12 @@ function Appointment() {
             <select value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })}
               className="w-full rounded-lg border border-border bg-background px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition">
               {services.map((s) => <option key={s.name}>{s.name}</option>)}
+            </select>
+          </Field>
+          <Field label="Berber Seçimi">
+            <select value={form.barber} onChange={(e) => setForm({ ...form, barber: e.target.value })}
+              className="w-full rounded-lg border border-border bg-background px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition">
+              {barbers.map((b) => <option key={b.name}>{b.name}</option>)}
             </select>
           </Field>
           <Field label="Tarih & Saat">
@@ -436,7 +451,7 @@ function Contact() {
                 <OpenBadge />
               </div>
               <div className="mt-3 grid sm:grid-cols-2 gap-2 text-base">
-                <p className="font-semibold"><span className="text-primary">Pazartesi - Cumartesi:</span> 09:00 - 21:00</p>
+                <p className="font-semibold"><span className="text-primary">Pazartesi'den Cumartesi'ye:</span> 09:00 - 21:00</p>
                 <p className="font-semibold"><span className="text-primary">Pazar:</span> Kapalı</p>
               </div>
             </div>
