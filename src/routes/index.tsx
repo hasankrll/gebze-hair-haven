@@ -16,6 +16,7 @@ import g3 from "@/assets/gallery/unnamed_3.webp.asset.json";
 import g4 from "@/assets/gallery/unnamed_4.webp.asset.json";
 import g5 from "@/assets/gallery/unnamed_5.webp.asset.json";
 import g6 from "@/assets/gallery/unnamed_6.webp.asset.json";
+import buzzCutsVideo from "@/assets/gallery/buzz-cuts.mp4";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -374,7 +375,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 function Gallery() {
-  const photos = galleryImages.slice(0, 6);
+  const photos = galleryImages.slice(0, 5);
   return (
     <section id="galeri" className="py-20 sm:py-28 bg-muted/40">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -396,6 +397,17 @@ function Gallery() {
               />
             </a>
           ))}
+          <div className="aspect-square overflow-hidden rounded-xl border border-border bg-card">
+            <video
+              src={buzzCutsVideo}
+              controls
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              className="h-full w-full object-cover"
+            />
+          </div>
         </div>
 
         {/* Instagram feed */}
