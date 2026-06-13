@@ -25,10 +25,45 @@ import randevuVideo5 from "@/assets/gallery/randevu-5.mp4";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Kafadar Erkek Kuaförü | Gebze Erkek Kuaförü" },
-      { name: "description", content: "Gebze'nin en iyi erkek kuaförü. Saç kesimi, sakal, fön ve daha fazlası. Randevu için WhatsApp: 0538 371 50 57" },
-      { property: "og:title", content: "Kafadar Erkek Kuaförü | Gebze Erkek Kuaförü" },
-      { property: "og:description", content: "Gebze'nin en iyi erkek kuaförü. Saç kesimi, sakal, fön ve daha fazlası. Randevu için WhatsApp: 0538 371 50 57" },
+      { title: "Kafadar Erkek Kuaförü | Gebze'nin En İyi Berberi" },
+      { name: "description", content: "Gebze Hacıhalil'de profesyonel saç kesimi, sakal tıraşı ve bakım hizmetleri. Pazartesi-Cumartesi 09:00-21:00 arası hizmetinizdeyiz. Randevu için WhatsApp: 0538 371 50 57" },
+      { property: "og:title", content: "Kafadar Erkek Kuaförü | Gebze'nin En İyi Berberi" },
+      { property: "og:description", content: "Gebze Hacıhalil'de profesyonel saç kesimi, sakal tıraşı ve bakım hizmetleri. Pazartesi-Cumartesi 09:00-21:00 arası hizmetinizdeyiz. Randevu için WhatsApp: 0538 371 50 57" },
+      {
+        "script:ld+json": {
+          "@context": "https://schema.org",
+          "@type": "HairSalon",
+          name: "Kafadar Erkek Kuaförü",
+          image: `https://kafadarkuafor.xyz${hero}`,
+          url: "https://kafadarkuafor.xyz",
+          telephone: "+905383715057",
+          address: {
+            "@type": "PostalAddress",
+            streetAddress: "Hacıhalil, 1208. Sk.",
+            addressLocality: "Gebze",
+            addressRegion: "Kocaeli",
+            postalCode: "41400",
+            addressCountry: "TR",
+          },
+          geo: {
+            "@type": "GeoCoordinates",
+            latitude: 40.795953,
+            longitude: 29.4344909,
+          },
+          openingHoursSpecification: {
+            "@type": "OpeningHoursSpecification",
+            dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+            opens: "09:00",
+            closes: "21:00",
+          },
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: "5.0",
+            reviewCount: "81",
+          },
+          sameAs: ["https://www.instagram.com/kafadarerkekkuaforu/"],
+        },
+      },
     ],
     scripts: [
       { src: "https://elfsightcdn.com/platform.js", async: true },
