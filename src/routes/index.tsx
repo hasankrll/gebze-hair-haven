@@ -315,7 +315,10 @@ function Appointment() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const target = barbers.find((b) => b.name === form.barber) ?? barbers[0];
-    const text = `Merhaba! 👋\n\n*${form.datetime}* tarihinde *${form.service}* için randevu almak istiyorum.\n\nAd Soyad: ${form.name}\n\nMüsait misiniz?`;
+    const aylar = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+    const dt = new Date(form.datetime);
+    const tarih = `${dt.getDate()} ${aylar[dt.getMonth()]} saat ${String(dt.getHours()).padStart(2,"0")}:${String(dt.getMinutes()).padStart(2,"0")}`;
+    const text = `Merhaba! 👋\n\n${tarih} tarihinde ${form.service} için randevu almak istiyorum.\n\nMüsait misiniz?\n\n${form.name}`;
     window.open(`https://wa.me/${target.wa}?text=${encodeURIComponent(text)}`, "_blank");
   };
 
