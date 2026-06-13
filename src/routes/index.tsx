@@ -9,6 +9,12 @@ import hero from "@/assets/hero.jpg";
 import team1 from "@/assets/team-1.jpg";
 import team2 from "@/assets/team-2.jpg";
 import team3 from "@/assets/team-3.jpg";
+import galleryPhoto1 from "@/assets/gallery/photo-1.webp";
+import galleryPhoto2 from "@/assets/gallery/photo-2.webp";
+import galleryPhoto3 from "@/assets/gallery/photo-3.webp";
+import galleryPhoto4 from "@/assets/gallery/photo-4.webp";
+import galleryPhoto5 from "@/assets/gallery/photo-5.webp";
+import galleryPhoto6 from "@/assets/gallery/photo-6.webp";
 import buzzCutsVideo from "@/assets/gallery/buzz-cuts.mp4";
 import randevuVideo1 from "@/assets/gallery/randevu-1.mp4";
 import randevuVideo2 from "@/assets/gallery/randevu-2.mp4";
@@ -32,14 +38,7 @@ const PHONE = "0538 371 50 57";
 const WHATSAPP = "905383715057";
 const WA_URL = `https://wa.me/${WHATSAPP}`;
 
-const galleryImages = [
-  "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=600",
-  "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=600",
-  "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?w=600",
-  "https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=600",
-  "https://images.unsplash.com/photo-1560066984-138dadb4c035?w=600",
-  "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=600",
-];
+const galleryImages = [galleryPhoto1, galleryPhoto2, galleryPhoto3, galleryPhoto4, galleryPhoto5, galleryPhoto6];
 const galleryVideos = [buzzCutsVideo, randevuVideo1, randevuVideo2, randevuVideo3, randevuVideo4, randevuVideo5];
 
 const services = [
