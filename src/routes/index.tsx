@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useRef } from "react";
 import {
   Scissors, Phone, MapPin, Clock, Instagram, Menu, X,
-  SprayCan, Droplets, Sparkles, Palette, Wind, Eye, Star, MessageCircle, ArrowDown,
+  SprayCan, Droplets, Sparkles, Palette, Wind, Eye, Star, MessageCircle, ArrowDown, Play,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import hero from "@/assets/hero.jpg";
@@ -397,22 +397,22 @@ function Services() {
         <SectionTitle kicker="Hizmetlerimiz" title="Profesyonel Erkek Bakımı" sub="İhtiyacınız olan her şey, tek çatı altında." />
       </div>
       <Reveal delay={150}>
-        <div className="flex gap-10 overflow-x-auto no-scrollbar px-6 pb-4 snap-x snap-mandatory sm:px-10 lg:px-16">
+        <div className="grid grid-cols-2 gap-4 px-6 pb-4 sm:px-10 md:flex md:grid-cols-none md:gap-10 md:overflow-x-auto md:no-scrollbar md:snap-x md:snap-mandatory lg:px-16">
           {services.map((s, i) => (
             <div
               key={s.name}
-              className="group shrink-0 w-[78vw] snap-start border-t border-foreground/10 py-10 transition-colors duration-500 hover:border-primary sm:w-[320px]"
+              className="group border-t border-foreground/10 py-5 transition-colors duration-500 hover:border-primary md:w-[320px] md:shrink-0 md:snap-start md:py-10"
             >
               <div className="flex items-start justify-between">
-                <span className="font-display text-6xl font-bold text-foreground/15 transition-colors duration-500 group-hover:text-primary">
+                <span className="font-display text-2xl font-bold text-foreground/15 transition-colors duration-500 group-hover:text-primary md:text-6xl">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <s.Icon className="h-6 w-6 text-foreground/30 transition-colors duration-500 group-hover:text-primary" />
+                <s.Icon className="h-5 w-5 text-foreground/30 transition-colors duration-500 group-hover:text-primary md:h-6 md:w-6" />
               </div>
-              <h3 className="mt-10 font-display text-2xl font-semibold text-foreground transition-colors duration-500 group-hover:text-primary">
+              <h3 className="mt-4 font-display text-base font-semibold text-foreground transition-colors duration-500 group-hover:text-primary md:mt-10 md:text-2xl">
                 {s.name}
               </h3>
-              <p className="mt-3 max-w-xs text-sm leading-relaxed text-foreground/50">{s.desc}</p>
+              <p className="mt-2 max-w-xs text-[0.8rem] leading-relaxed text-foreground/50 md:mt-3 md:text-sm">{s.desc}</p>
             </div>
           ))}
         </div>
@@ -567,6 +567,43 @@ function UnderlineField({ label, children }: { label: string; children: React.Re
 
 const galleryAspects = ["aspect-[3/4]", "aspect-square", "aspect-[4/5]", "aspect-square", "aspect-[3/4]"];
 
+/** Gallery video tile with a play-icon overlay and single-playback enforcement. */
+function VideoCard({ src }: { src: string }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [playing, setPlaying] = useState(false);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const onPlay = () => {
+      setPlaying(true);
+      document.querySelectorAll("video").forEach((other) => {
+        if (other !== video) other.pause();
+      });
+    };
+    const onPause = () => setPlaying(false);
+    video.addEventListener("play", onPlay);
+    video.addEventListener("pause", onPause);
+    return () => {
+      video.removeEventListener("play", onPlay);
+      video.removeEventListener("pause", onPause);
+    };
+  }, []);
+
+  return (
+    <div className="relative block aspect-[3/4] w-full overflow-hidden break-inside-avoid bg-card">
+      <video ref={videoRef} src={src} controls muted loop playsInline preload="metadata" className="h-full w-full object-cover" />
+      {!playing && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-gradient-to-t from-black/70 via-black/10 to-black/40">
+          <div className="flex h-14 w-14 items-center justify-center rounded-full bg-foreground/90">
+            <Play className="h-6 w-6 fill-background text-background" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Gallery() {
   const photos = galleryImages.slice(0, 5);
   return (
@@ -595,9 +632,7 @@ function Gallery() {
               </a>
             ))}
             {galleryVideos.map((src, i) => (
-              <div key={`video-${i}`} className="block aspect-[3/4] w-full overflow-hidden break-inside-avoid bg-card">
-                <video src={src} controls muted loop playsInline preload="metadata" className="h-full w-full object-cover" />
-              </div>
+              <VideoCard key={`video-${i}`} src={src} />
             ))}
           </div>
         </Reveal>
