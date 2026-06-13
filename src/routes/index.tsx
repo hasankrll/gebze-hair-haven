@@ -95,7 +95,10 @@ function useOpenStatus(): { color: BadgeColor; label: string } {
       } else if (h < 9) {
         setStatus({ color: "orange", label: "Bugün 09:00'da Açıyoruz" });
       } else if (h >= 21) {
-        setStatus({ color: "orange", label: "Yarın 09:00'da Açıyoruz" });
+        setStatus({
+          color: "orange",
+          label: day === 6 ? "Pazartesi 09:00'da Açıyoruz" : "Yarın 09:00'da Açıyoruz",
+        });
       } else {
         setStatus({ color: "green", label: "Bugün Müsaitiz ✓" });
       }
@@ -470,7 +473,7 @@ const toDateInputValue = (d: Date) =>
   `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 
 function Appointment() {
-  const [form, setForm] = useState({ name: "", phone: "", service: services[0].name, date: "", time: TIME_SLOTS[0], barber: barbers[0].name });
+  const [form, setForm] = useState({ name: "", service: services[0].name, date: "", time: TIME_SLOTS[0], barber: barbers[0].name });
 
   const today = new Date();
   const maxDate = new Date(today);
@@ -520,10 +523,6 @@ function Appointment() {
             <UnderlineField label="Ad Soyad">
               <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
                 className={underline} placeholder="Adınız Soyadınız" />
-            </UnderlineField>
-            <UnderlineField label="Telefon">
-              <input required type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className={underline} placeholder="05XX XXX XX XX" />
             </UnderlineField>
             <UnderlineField label="Hizmet Seçimi">
               <select value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })} className={underline}>
