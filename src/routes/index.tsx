@@ -17,6 +17,11 @@ import g4 from "@/assets/gallery/unnamed_4.webp.asset.json";
 import g5 from "@/assets/gallery/unnamed_5.webp.asset.json";
 import g6 from "@/assets/gallery/unnamed_6.webp.asset.json";
 import buzzCutsVideo from "@/assets/gallery/buzz-cuts.mp4";
+import randevuVideo1 from "@/assets/gallery/randevu-1.mp4";
+import randevuVideo2 from "@/assets/gallery/randevu-2.mp4";
+import randevuVideo3 from "@/assets/gallery/randevu-3.mp4";
+import randevuVideo4 from "@/assets/gallery/randevu-4.mp4";
+import randevuVideo5 from "@/assets/gallery/randevu-5.mp4";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -35,6 +40,7 @@ const WHATSAPP = "905383715057";
 const WA_URL = `https://wa.me/${WHATSAPP}`;
 
 const galleryImages = [g0.url, g1.url, g2.url, g3.url, g4.url, g5.url, g6.url];
+const galleryVideos = [buzzCutsVideo, randevuVideo1, randevuVideo2, randevuVideo3, randevuVideo4, randevuVideo5];
 
 const services = [
   { name: "Saç Kesimi", desc: "Modern ve klasik saç kesim teknikleri.", Icon: Scissors },
@@ -310,15 +316,32 @@ const barbers = [
   { name: "Erhan Karataş", wa: "905383715057" },
 ];
 
+// 09:00, 09:30, 10:00 ... 21:00
+const TIME_SLOTS = Array.from({ length: 25 }, (_, i) => {
+  const totalMinutes = 9 * 60 + i * 30;
+  const h = String(Math.floor(totalMinutes / 60)).padStart(2, "0");
+  const m = String(totalMinutes % 60).padStart(2, "0");
+  return `${h}:${m}`;
+});
+
+const toDateInputValue = (d: Date) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+
 function Appointment() {
-  const [form, setForm] = useState({ name: "", phone: "", service: services[0].name, datetime: "", barber: barbers[0].name });
+  const [form, setForm] = useState({ name: "", phone: "", service: services[0].name, date: "", time: TIME_SLOTS[0], barber: barbers[0].name });
+
+  const today = new Date();
+  const maxDate = new Date(today);
+  maxDate.setMonth(maxDate.getMonth() + 1);
+  const minDateStr = toDateInputValue(today);
+  const maxDateStr = toDateInputValue(maxDate);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const target = barbers.find((b) => b.name === form.barber) ?? barbers[0];
     const aylar = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
-    const dt = new Date(form.datetime);
-    const tarih = `${dt.getDate()} ${aylar[dt.getMonth()]} saat ${String(dt.getHours()).padStart(2,"0")}:${String(dt.getMinutes()).padStart(2,"0")}`;
+    const dt = new Date(`${form.date}T${form.time}`);
+    const tarih = `${dt.getDate()} ${aylar[dt.getMonth()]} saat ${form.time}`;
     const text = `Merhaba! 👋\n\n${tarih} tarihinde ${form.service} için randevu almak istiyorum.\n\nMüsait misiniz?\n\n${form.name}`;
     window.open(`https://wa.me/${target.wa}?text=${encodeURIComponent(text)}`, "_blank");
   };
@@ -351,10 +374,19 @@ function Appointment() {
               {barbers.map((b) => <option key={b.name}>{b.name}</option>)}
             </select>
           </Field>
-          <Field label="Tarih & Saat">
-            <input required type="datetime-local" value={form.datetime} onChange={(e) => setForm({ ...form, datetime: e.target.value })}
-              className="w-full rounded-lg border border-border bg-background px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition" />
-          </Field>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <Field label="Tarih">
+              <input required type="date" min={minDateStr} max={maxDateStr} value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                className="w-full rounded-lg border border-border bg-background px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition" />
+            </Field>
+            <Field label="Saat">
+              <select required value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })}
+                className="w-full rounded-lg border border-border bg-background px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition">
+                {TIME_SLOTS.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </Field>
+          </div>
           <button type="submit" className="w-full rounded-full bg-primary text-primary-foreground py-3.5 font-semibold hover:opacity-90 transition"
             style={{ boxShadow: "var(--shadow-glow)" }}>
             WhatsApp ile Gönder
@@ -397,17 +429,19 @@ function Gallery() {
               />
             </a>
           ))}
-          <div className="aspect-square overflow-hidden rounded-xl border border-border bg-card">
-            <video
-              src={buzzCutsVideo}
-              controls
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              className="h-full w-full object-cover"
-            />
-          </div>
+          {galleryVideos.map((src, i) => (
+            <div key={`video-${i}`} className="aspect-square overflow-hidden rounded-xl border border-border bg-card">
+              <video
+                src={src}
+                controls
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ))}
         </div>
 
         {/* Instagram feed */}
