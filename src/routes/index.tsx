@@ -435,7 +435,7 @@ function Team() {
                   src={m.img}
                   alt={m.name}
                   loading="lazy"
-                  className="h-full w-full object-cover grayscale transition-all duration-700 ease-out group-hover:scale-105 group-hover:grayscale-0"
+                  className="h-full w-full object-cover transition-all duration-700 ease-out group-hover:scale-105 lg:grayscale lg:group-hover:grayscale-0"
                 />
               </div>
               <div className="px-2 py-6 sm:px-6">
