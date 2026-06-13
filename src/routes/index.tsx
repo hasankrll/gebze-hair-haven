@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Scissors, Phone, MapPin, Clock, Instagram, Menu, X,
-  SprayCan, Droplets, Sparkles, Palette, Wind, Eye, Star, MessageCircle,
+  SprayCan, Droplets, Sparkles, Palette, Wind, Eye, Star, MessageCircle, ArrowDown,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import hero from "@/assets/hero.jpg";
@@ -85,6 +85,77 @@ function useOpenStatus() {
   return open;
 }
 
+function useScrolled(threshold = 40) {
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > threshold);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [threshold]);
+  return scrolled;
+}
+
+function useActiveSection(ids: string[]) {
+  const [active, setActive] = useState(ids[0]);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) setActive(entry.target.id);
+        });
+      },
+      { rootMargin: "-45% 0px -50% 0px" }
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [ids]);
+  return active;
+}
+
+/** Fades + slides an element up into view the first time it enters the viewport. */
+function Reveal({
+  delay = 0,
+  className = "",
+  children,
+}: {
+  delay?: number;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className={`reveal ${visible ? "reveal-visible" : ""} ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+}
+
 function Home() {
   const [open, setOpen] = useState(false);
   return (
@@ -118,49 +189,74 @@ function OpenBadge({ className = "" }: { className?: string }) {
   );
 }
 
+const navIds = nav.map((n) => n.href.slice(1));
+
 function Navbar({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => void }) {
+  const scrolled = useScrolled();
+  const active = useActiveSection(navIds);
+
   return (
-    <header className="sticky top-0 z-50 backdrop-blur-md bg-background/85 border-b border-border">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <a href="#top" className="flex items-center gap-2 min-w-0">
-          <Scissors className="h-6 w-6 text-primary shrink-0" />
-          <span className="font-display font-bold text-lg sm:text-xl tracking-tight truncate">
-            Kafadar <span className="text-primary">Kuaförü</span>
-          </span>
+    <header
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
+        scrolled ? "backdrop-blur-md bg-background/75 border-b border-white/10" : "bg-transparent border-b border-transparent"
+      }`}
+    >
+      <div className="mx-auto max-w-[1600px] px-6 sm:px-10 lg:px-16 h-20 flex items-center justify-between">
+        <a href="#top" className="font-display text-xl sm:text-2xl font-bold tracking-[0.2em] text-foreground">
+          KAFADAR
         </a>
-        <nav className="hidden md:flex items-center gap-8">
-          {nav.map((n) => (
-            <a key={n.href} href={n.href} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
-              {n.label}
-            </a>
-          ))}
+        <nav className="hidden lg:flex items-center gap-10">
+          {nav.map((n) => {
+            const isActive = active === n.href.slice(1);
+            return (
+              <a
+                key={n.href}
+                href={n.href}
+                className={`relative pb-2 text-xs font-medium uppercase tracking-[0.3em] transition-colors duration-300 ${
+                  isActive ? "text-primary" : "text-foreground/60 hover:text-foreground"
+                }`}
+              >
+                {n.label}
+                <span
+                  className={`absolute inset-x-0 -bottom-0.5 h-px bg-primary transition-transform duration-300 origin-left ${
+                    isActive ? "scale-x-100" : "scale-x-0"
+                  }`}
+                />
+              </a>
+            );
+          })}
         </nav>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <OpenBadge className="hidden lg:inline-flex" />
           <a
             href="#randevu"
-            className="hidden sm:inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground shadow-elegant hover:opacity-90 transition"
+            className="hidden sm:inline-flex items-center gap-2 border border-primary px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.25em] text-primary hover:bg-primary hover:text-primary-foreground transition-colors duration-300"
           >
             Randevu Al
           </a>
-          <button className="md:hidden p-2 rounded-md hover:bg-muted" onClick={() => setOpen(!open)} aria-label="Menü">
-            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          <button className="lg:hidden p-2 text-foreground" onClick={() => setOpen(!open)} aria-label="Menü">
+            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
       </div>
       {open && (
-        <div className="md:hidden border-t border-border bg-background">
-          <div className="px-4 py-4 flex flex-col gap-3">
+        <div className="lg:hidden border-t border-white/10 bg-background/95 backdrop-blur-md">
+          <div className="px-6 py-6 flex flex-col gap-5">
             {nav.map((n) => (
-              <a key={n.href} href={n.href} onClick={() => setOpen(false)} className="text-sm font-medium py-2">
+              <a
+                key={n.href}
+                href={n.href}
+                onClick={() => setOpen(false)}
+                className="text-sm font-medium uppercase tracking-[0.3em] text-foreground/80 hover:text-primary transition-colors"
+              >
                 {n.label}
               </a>
             ))}
-            <OpenBadge />
+            <OpenBadge className="w-fit" />
             <a
               href="#randevu"
               onClick={() => setOpen(false)}
-              className="sm:hidden inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+              className="inline-flex items-center justify-center border border-primary px-6 py-3 text-xs font-semibold uppercase tracking-[0.25em] text-primary"
             >
               Randevu Al
             </a>
@@ -189,119 +285,164 @@ function BarberPole({ className = "" }: { className?: string }) {
         />
         <div className="absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/20" />
       </div>
-      <style>{`
-        @keyframes barber-spin { from { background-position: 0 0; } to { background-position: 0 -56px; } }
-        .animate-barber-spin { animation: barber-spin 1.6s linear infinite; }
-      `}</style>
     </div>
   );
 }
 
 function Hero() {
   return (
-    <section id="top" className="relative overflow-hidden">
+    <section id="top" className="relative flex h-screen min-h-[680px] flex-col overflow-hidden bg-background">
+      {/* Dark, moody backdrop */}
       <div className="absolute inset-0">
-        <img src={hero} alt="Kafadar Kuaförü iç mekan" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[oklch(0.15_0.02_220/0.92)] via-[oklch(0.15_0.02_220/0.75)] to-[oklch(0.15_0.02_220/0.55)]" />
+        <img src={hero} alt="Kafadar Kuaförü iç mekan" className="h-full w-full object-cover opacity-25 grayscale" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/85 to-background/60" />
       </div>
-      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 sm:py-32 lg:py-44 grid lg:grid-cols-[1.4fr_1fr] gap-12 items-center">
-        <div>
-          <div className="flex flex-wrap items-center gap-3 mb-6">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-medium text-primary">
+
+      <div className="relative flex-1 mx-auto w-full max-w-[1700px] px-6 sm:px-10 lg:px-16 grid lg:grid-cols-[auto_1fr_auto] items-center gap-10 pt-28 pb-12">
+        {/* Giant vertical wordmark */}
+        <div
+          aria-hidden
+          className="hidden lg:block select-none font-display font-black leading-[0.85] text-foreground/90"
+          style={{ writingMode: "vertical-rl", fontSize: "9vw", letterSpacing: "0.08em" }}
+        >
+          KAFADAR
+        </div>
+
+        {/* Center content */}
+        <div className="max-w-xl">
+          <div className="flex flex-wrap items-center gap-3 mb-8">
+            <div className="inline-flex items-center gap-2 border border-primary/40 px-4 py-1.5 text-[11px] font-medium uppercase tracking-[0.3em] text-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
               Gebze • Hacıhalil
             </div>
             <OpenBadge />
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black text-white leading-[1.05]">
-            Kafadar <br />
-            <span className="text-gradient-teal">Erkek Kuaförü</span>
+
+          <h1 className="font-display font-black leading-[0.95] text-foreground text-7xl sm:text-8xl lg:text-6xl xl:text-7xl">
+            KAFADAR
+            <span className="block mt-3 text-sm sm:text-base font-sans font-medium uppercase tracking-[0.3em] text-primary">
+              Erkek Kuaförü
+            </span>
           </h1>
-          <p className="mt-6 text-lg sm:text-xl text-white/80 max-w-xl">
+
+          <p className="mt-8 text-base sm:text-lg text-foreground/60 max-w-md leading-relaxed">
             Erkek bakımında Gebze'nin adresi. Klasik ustalık, modern tarz.
           </p>
+
           <div className="mt-10 flex flex-wrap gap-4">
-          <a
-            href="#randevu"
-            className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-base font-semibold text-primary-foreground hover:scale-[1.02] transition"
-            style={{ boxShadow: "var(--shadow-glow)" }}
-          >
-            <Phone className="h-4 w-4" /> Randevu Al
-          </a>
-          <a
-            href="#hizmetler"
-            className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/5 backdrop-blur px-7 py-3.5 text-base font-semibold text-white hover:bg-white/10 transition"
-          >
-            Hizmetlerimiz
-          </a>
+            <a
+              href="#randevu"
+              className="inline-flex items-center gap-2 bg-primary px-8 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-primary-foreground transition hover:opacity-90"
+              style={{ boxShadow: "var(--shadow-glow)" }}
+            >
+              <Phone className="h-4 w-4" /> Randevu Al
+            </a>
+            <a
+              href="#hizmetler"
+              className="inline-flex items-center gap-2 border border-foreground/20 px-8 py-4 text-xs font-semibold uppercase tracking-[0.25em] text-foreground transition hover:border-primary hover:text-primary"
+            >
+              Hizmetlerimiz
+            </a>
           </div>
         </div>
-        <div className="hidden lg:flex justify-center items-center gap-8">
-          <BarberPole />
+
+        {/* Logo + spinning barber pole */}
+        <div className="hidden lg:flex flex-col items-center gap-10">
           <div className="relative">
-            <div className="absolute inset-0 rounded-full bg-primary/30 blur-3xl" />
-            <img src={logo} alt="Kafadar logo" className="relative h-64 w-64 object-contain bg-white/95 rounded-full p-6 shadow-elegant" />
+            <div className="absolute inset-0 rounded-full bg-primary/20 blur-3xl" />
+            <img src={logo} alt="Kafadar logo" className="relative h-40 w-40 object-contain rounded-full bg-foreground/95 p-6 shadow-elegant" />
           </div>
-        </div>
-        <div className="lg:hidden flex justify-center">
           <BarberPole />
         </div>
       </div>
+
+      <div className="relative lg:hidden flex justify-center pb-10">
+        <BarberPole />
+      </div>
+
+      {/* Thin gold divider */}
+      <div className="relative h-px w-full bg-gradient-to-r from-transparent via-primary to-transparent" />
+
+      {/* Scroll to explore */}
+      <a
+        href="#hizmetler"
+        aria-label="Scroll to explore"
+        className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-foreground/50 transition-colors hover:text-primary animate-scroll-bounce"
+      >
+        <span className="text-[10px] font-medium uppercase tracking-[0.35em]">Scroll</span>
+        <ArrowDown className="h-4 w-4" />
+      </a>
     </section>
   );
 }
 
-function SectionTitle({ kicker, title, sub }: { kicker: string; title: string; sub?: string }) {
+function SectionTitle({ kicker, title, sub, align = "center" }: { kicker: string; title: string; sub?: string; align?: "center" | "left" }) {
+  const isLeft = align === "left";
   return (
-    <div className="text-center max-w-2xl mx-auto mb-14">
-      <div className="text-xs font-bold tracking-[0.3em] text-primary uppercase mb-3">{kicker}</div>
-      <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold">{title}</h2>
-      {sub && <p className="mt-4 text-muted-foreground">{sub}</p>}
-    </div>
+    <Reveal className={`max-w-2xl ${isLeft ? "" : "mx-auto text-center"} mb-16`}>
+      <div className={`mb-4 flex items-center gap-4 text-xs font-bold uppercase tracking-[0.3em] text-primary ${isLeft ? "" : "justify-center"}`}>
+        {isLeft && <span className="h-px w-8 bg-primary" />}
+        {kicker}
+      </div>
+      <h2 className="font-display text-4xl font-bold text-foreground sm:text-5xl lg:text-6xl">{title}</h2>
+      {sub && <p className={`mt-4 max-w-md text-foreground/50 ${isLeft ? "" : "mx-auto"}`}>{sub}</p>}
+    </Reveal>
   );
 }
 
 function Services() {
   return (
-    <section id="hizmetler" className="py-20 sm:py-28 bg-background">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="hizmetler" className="overflow-hidden bg-background py-24 sm:py-32">
+      <div className="mx-auto max-w-[1600px] px-6 sm:px-10 lg:px-16">
         <SectionTitle kicker="Hizmetlerimiz" title="Profesyonel Erkek Bakımı" sub="İhtiyacınız olan her şey, tek çatı altında." />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {services.map((s) => (
-            <div key={s.name} className="group relative bg-card border border-border rounded-xl p-6 hover:border-primary/50 hover:shadow-elegant transition-all">
-              <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary transition-colors">
-                <s.Icon className="h-6 w-6 text-primary group-hover:text-primary-foreground transition-colors" />
+      </div>
+      <Reveal delay={150}>
+        <div className="flex gap-10 overflow-x-auto no-scrollbar px-6 pb-4 snap-x snap-mandatory sm:px-10 lg:px-16">
+          {services.map((s, i) => (
+            <div
+              key={s.name}
+              className="group shrink-0 w-[78vw] snap-start border-t border-foreground/10 py-10 transition-colors duration-500 hover:border-primary sm:w-[320px]"
+            >
+              <div className="flex items-start justify-between">
+                <span className="font-display text-6xl font-bold text-foreground/15 transition-colors duration-500 group-hover:text-primary">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <s.Icon className="h-6 w-6 text-foreground/30 transition-colors duration-500 group-hover:text-primary" />
               </div>
-              <h3 className="mt-5 font-semibold text-lg">{s.name}</h3>
-              <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+              <h3 className="mt-10 font-display text-2xl font-semibold text-foreground transition-colors duration-500 group-hover:text-primary">
+                {s.name}
+              </h3>
+              <p className="mt-3 max-w-xs text-sm leading-relaxed text-foreground/50">{s.desc}</p>
             </div>
           ))}
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }
 
 function Team() {
   return (
-    <section id="ekibimiz" className="py-20 sm:py-28 bg-gradient-dark text-white">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-2xl mx-auto mb-14">
-          <div className="text-xs font-bold tracking-[0.3em] text-primary uppercase mb-3">Ekibimiz</div>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">Ustalarımızla Tanışın</h2>
-          <p className="mt-4 text-white/70">Yıllarca tecrübeyle hizmetinizdeyiz.</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {team.map((m) => (
-            <div key={m.name} className="group relative overflow-hidden rounded-2xl bg-white/5 border border-white/10">
-              <div className="aspect-[4/5] overflow-hidden">
-                <img src={m.img} alt={m.name} loading="lazy" className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700" />
+    <section id="ekibimiz" className="bg-background py-24 sm:py-32">
+      <div className="mx-auto max-w-[1600px] px-6 sm:px-10 lg:px-16">
+        <SectionTitle kicker="Ekibimiz" title="Ustalarımızla Tanışın" sub="Yıllarca tecrübeyle hizmetinizdeyiz." />
+        <div className="grid grid-cols-1 gap-px bg-foreground/10 sm:grid-cols-3">
+          {team.map((m, i) => (
+            <Reveal key={m.name} delay={i * 120} className="group bg-background">
+              <div className="aspect-[3/4] overflow-hidden">
+                <img
+                  src={m.img}
+                  alt={m.name}
+                  loading="lazy"
+                  className="h-full w-full object-cover grayscale transition-all duration-700 ease-out group-hover:scale-105 group-hover:grayscale-0"
+                />
               </div>
-              <div className="absolute inset-x-0 bottom-0 p-6 bg-gradient-to-t from-black/90 to-transparent">
-                <h3 className="text-xl font-bold text-white">{m.name}</h3>
-                <p className="text-sm text-primary mt-1">{m.role}</p>
+              <div className="px-2 py-6 sm:px-6">
+                <h3 className="font-display text-xl font-semibold text-foreground">{m.name}</h3>
+                <span className="mt-3 block h-px w-12 bg-primary transition-all duration-500 group-hover:w-full" />
+                <p className="mt-3 text-xs uppercase tracking-[0.25em] text-foreground/50">{m.role}</p>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -347,124 +488,141 @@ function Appointment() {
   };
 
 
+  const underline = "w-full border-0 border-b border-[#0a0a0a]/20 bg-transparent px-0 py-3 text-base text-[#0a0a0a] outline-none transition-colors focus:border-primary";
+
   return (
-    <section id="randevu" className="py-20 sm:py-28 bg-background">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <SectionTitle kicker="Randevu" title="Randevunuzu Oluşturun" sub="Formu doldurun, WhatsApp üzerinden anında iletişime geçelim." />
-        <form onSubmit={handleSubmit} className="bg-card border border-border rounded-2xl p-6 sm:p-10 shadow-elegant space-y-5">
-          <Field label="Ad Soyad">
-            <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full rounded-lg border border-border bg-background px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
-              placeholder="Adınız Soyadınız" />
-          </Field>
-          <Field label="Telefon">
-            <input required type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="w-full rounded-lg border border-border bg-background px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
-              placeholder="05XX XXX XX XX" />
-          </Field>
-          <Field label="Hizmet Seçimi">
-            <select value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })}
-              className="w-full rounded-lg border border-border bg-background px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition">
-              {services.map((s) => <option key={s.name}>{s.name}</option>)}
-            </select>
-          </Field>
-          <Field label="Berber Seçimi">
-            <select value={form.barber} onChange={(e) => setForm({ ...form, barber: e.target.value })}
-              className="w-full rounded-lg border border-border bg-background px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition">
-              {barbers.map((b) => <option key={b.name}>{b.name}</option>)}
-            </select>
-          </Field>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <Field label="Tarih">
-              <input required type="date" min={minDateStr} max={maxDateStr} value={form.date}
-                onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="w-full rounded-lg border border-border bg-background px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition" />
-            </Field>
-            <Field label="Saat">
-              <select required value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })}
-                className="w-full rounded-lg border border-border bg-background px-4 py-3 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition">
-                {TIME_SLOTS.map((t) => <option key={t} value={t}>{t}</option>)}
-              </select>
-            </Field>
+    <section id="randevu" className="bg-background">
+      <div className="grid lg:grid-cols-2">
+        {/* Dark info panel */}
+        <Reveal className="flex flex-col justify-center bg-card px-6 py-24 sm:px-10 sm:py-32 lg:px-16">
+          <SectionTitle kicker="Randevu" title="Randevunuzu Oluşturun" sub="Formu doldurun, WhatsApp üzerinden anında iletişime geçelim." align="left" />
+          <div className="space-y-8">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary">Telefon</p>
+              <p className="mt-2 text-lg text-foreground">{PHONE}</p>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary">Çalışma Saatleri</p>
+              <p className="mt-2 text-lg text-foreground">Pzt - Cmt: 09:00 - 21:00</p>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary">Adres</p>
+              <p className="mt-2 text-lg text-foreground">Hacıhalil, 1208. Sk. 41400 Gebze / Kocaeli</p>
+            </div>
           </div>
-          <button type="submit" className="w-full rounded-full bg-primary text-primary-foreground py-3.5 font-semibold hover:opacity-90 transition"
-            style={{ boxShadow: "var(--shadow-glow)" }}>
-            WhatsApp ile Gönder
-          </button>
-        </form>
+          <OpenBadge className="mt-10 w-fit" />
+        </Reveal>
+
+        {/* Light form panel */}
+        <Reveal delay={150} className="bg-[#f5f5f0] px-6 py-24 sm:px-10 sm:py-32 lg:px-16">
+          <form onSubmit={handleSubmit} className="mx-auto max-w-md space-y-8 lg:mx-0">
+            <UnderlineField label="Ad Soyad">
+              <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className={underline} placeholder="Adınız Soyadınız" />
+            </UnderlineField>
+            <UnderlineField label="Telefon">
+              <input required type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                className={underline} placeholder="05XX XXX XX XX" />
+            </UnderlineField>
+            <UnderlineField label="Hizmet Seçimi">
+              <select value={form.service} onChange={(e) => setForm({ ...form, service: e.target.value })} className={underline}>
+                {services.map((s) => <option key={s.name}>{s.name}</option>)}
+              </select>
+            </UnderlineField>
+            <UnderlineField label="Berber Seçimi">
+              <select value={form.barber} onChange={(e) => setForm({ ...form, barber: e.target.value })} className={underline}>
+                {barbers.map((b) => <option key={b.name}>{b.name}</option>)}
+              </select>
+            </UnderlineField>
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+              <UnderlineField label="Tarih">
+                <input required type="date" min={minDateStr} max={maxDateStr} value={form.date}
+                  onChange={(e) => setForm({ ...form, date: e.target.value })} className={underline} />
+              </UnderlineField>
+              <UnderlineField label="Saat">
+                <select required value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} className={underline}>
+                  {TIME_SLOTS.map((t) => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </UnderlineField>
+            </div>
+            <button type="submit" className="w-full bg-primary py-4 text-xs font-semibold uppercase tracking-[0.3em] text-primary-foreground transition hover:opacity-90"
+              style={{ boxShadow: "var(--shadow-glow)" }}>
+              WhatsApp ile Gönder
+            </button>
+          </form>
+        </Reveal>
       </div>
     </section>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function UnderlineField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="text-sm font-medium mb-2 block">{label}</span>
+      <span className="mb-2 block text-xs font-bold uppercase tracking-[0.25em] text-[#0a0a0a]/50">{label}</span>
       {children}
     </label>
   );
 }
 
+const galleryAspects = ["aspect-[3/4]", "aspect-square", "aspect-[4/5]", "aspect-square", "aspect-[3/4]"];
+
 function Gallery() {
   const photos = galleryImages.slice(0, 5);
   return (
-    <section id="galeri" className="py-20 sm:py-28 bg-muted/40">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section id="galeri" className="bg-background py-24 sm:py-32">
+      <div className="mx-auto max-w-[1600px] px-6 sm:px-10 lg:px-16">
         <SectionTitle kicker="Galeri" title="Çalışmalarımız" sub="Salonumuzdan ve işlerimizden kareler." />
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {photos.map((src, i) => (
-            <a
-              key={i}
-              href={src}
-              target="_blank"
-              rel="noreferrer"
-              className="group aspect-square overflow-hidden rounded-xl border border-border bg-card block"
-            >
-              <img
-                src={src}
-                alt={`Kafadar Kuaförü galeri ${i + 1}`}
-                loading="lazy"
-                className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            </a>
-          ))}
-          {galleryVideos.map((src, i) => (
-            <div key={`video-${i}`} className="aspect-square overflow-hidden rounded-xl border border-border bg-card">
-              <video
-                src={src}
-                controls
-                muted
-                loop
-                playsInline
-                preload="metadata"
-                className="h-full w-full object-cover"
-              />
-            </div>
-          ))}
-        </div>
+        <Reveal delay={150}>
+          <div className="columns-2 gap-4 sm:columns-3 lg:columns-4 [&>*]:mb-4">
+            {photos.map((src, i) => (
+              <a
+                key={i}
+                href={src}
+                target="_blank"
+                rel="noreferrer"
+                className={`group relative block w-full overflow-hidden break-inside-avoid bg-card ${galleryAspects[i % galleryAspects.length]}`}
+              >
+                <img
+                  src={src}
+                  alt={`Kafadar Kuaförü galeri ${i + 1}`}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-background/0 transition-colors duration-500 group-hover:bg-background/50">
+                  <Eye className="h-6 w-6 text-foreground opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                </div>
+              </a>
+            ))}
+            {galleryVideos.map((src, i) => (
+              <div key={`video-${i}`} className="block aspect-[3/4] w-full overflow-hidden break-inside-avoid bg-card">
+                <video src={src} controls muted loop playsInline preload="metadata" className="h-full w-full object-cover" />
+              </div>
+            ))}
+          </div>
+        </Reveal>
 
         {/* Instagram feed */}
-        <div className="mt-16">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-12 rounded-xl bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 flex items-center justify-center">
-                <Instagram className="h-6 w-6 text-white" />
+        <Reveal delay={250} className="mt-20">
+          <div className="mb-8 flex flex-col items-center justify-between gap-6 border-t border-foreground/10 pt-10 sm:flex-row">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center border border-primary/40 text-primary">
+                <Instagram className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="font-display font-bold text-xl">Instagram'da Biz</h3>
-                <p className="text-sm text-muted-foreground">@kafadarerkekkuaforu</p>
+                <h3 className="font-display text-xl font-bold text-foreground">Instagram'da Biz</h3>
+                <p className="text-sm text-foreground/50">@kafadarerkekkuaforu</p>
               </div>
             </div>
             <a
               href="https://www.instagram.com/kafadarerkekkuaforu/"
               target="_blank" rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white px-5 py-2.5 text-sm font-semibold hover:opacity-90 transition"
+              className="inline-flex items-center gap-2 border border-primary px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.25em] text-primary transition hover:bg-primary hover:text-primary-foreground"
             >
               <Instagram className="h-4 w-4" /> Takip Et
             </a>
           </div>
-          <div className="rounded-2xl overflow-hidden border border-border bg-card">
+          <div className="overflow-hidden border border-foreground/10 bg-card">
             <iframe
               title="Instagram @kafadarerkekkuaforu"
               src="https://www.instagram.com/kafadarerkekkuaforu/embed"
@@ -475,7 +633,7 @@ function Gallery() {
               allowTransparency
             />
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -483,47 +641,32 @@ function Gallery() {
 
 function Contact() {
   return (
-    <section id="iletisim" className="py-20 sm:py-28 bg-background">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <SectionTitle kicker="İletişim" title="Bize Ulaşın" />
-
-        {/* Featured hours block */}
-        <div className="mb-10 rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent p-6 sm:p-8 shadow-elegant">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            <div className="h-16 w-16 shrink-0 rounded-2xl bg-primary flex items-center justify-center shadow-lg">
-              <Clock className="h-8 w-8 text-primary-foreground" />
-            </div>
-            <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-3">
-                <h3 className="font-display font-bold text-2xl">Çalışma Saatleri</h3>
-                <OpenBadge />
-              </div>
-              <div className="mt-3 grid sm:grid-cols-2 gap-2 text-base">
-                <p className="font-semibold"><span className="text-primary">Pazartesi'den Cumartesi'ye:</span> 09:00 - 21:00</p>
-                <p className="font-semibold"><span className="text-primary">Pazar:</span> Kapalı</p>
-              </div>
-            </div>
-          </div>
+    <section id="iletisim" className="relative h-[680px] overflow-hidden bg-background sm:h-[780px]">
+      <iframe
+        title="Kafadar Kuaförü Konumu"
+        src="https://www.google.com/maps?q=40.795953,29.4344909&hl=tr&z=16&output=embed"
+        className="absolute inset-0 h-full w-full"
+        style={{ filter: "grayscale(1) invert(0.9) contrast(0.85)" }}
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+      <Reveal className="absolute inset-x-0 bottom-0 px-6 py-12 sm:px-10 sm:py-16 lg:px-16">
+        <SectionTitle kicker="İletişim" title="Bize Ulaşın" align="left" />
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
+          <InfoRow Icon={MapPin} title="Adres" lines={["Hacıhalil, 1208. Sk.", "41400 Gebze / Kocaeli"]} />
+          <InfoRow Icon={Phone} title="Telefon" lines={[PHONE]} href={`tel:${PHONE.replace(/\s/g, "")}`} />
+          <InfoRow Icon={Instagram} title="Instagram" lines={["@kafadarerkekkuaforu"]} href="https://www.instagram.com/kafadarerkekkuaforu/" />
+          <InfoRow Icon={MessageCircle} title="WhatsApp" lines={[PHONE]} href={WA_URL} />
         </div>
-
-        <div className="grid lg:grid-cols-2 gap-8">
-          <div className="space-y-5">
-            <InfoRow Icon={MapPin} title="Adres" lines={["Hacıhalil, 1208. Sk.", "41400 Gebze / Kocaeli"]} />
-            <InfoRow Icon={Phone} title="Telefon" lines={[PHONE]} href={`tel:${PHONE.replace(/\s/g, "")}`} />
-            <InfoRow Icon={Instagram} title="Instagram" lines={["@kafadarerkekkuaforu"]} href="https://www.instagram.com/kafadarerkekkuaforu/" />
-            <InfoRow Icon={MessageCircle} title="WhatsApp" lines={[PHONE]} href={WA_URL} />
-          </div>
-          <div className="rounded-2xl overflow-hidden border border-border shadow-elegant h-[400px] lg:h-auto min-h-[400px]">
-            <iframe
-              title="Kafadar Kuaförü Konumu"
-              src="https://www.google.com/maps?q=40.795953,29.4344909&hl=tr&z=17&output=embed"
-              className="h-full w-full"
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-            />
-          </div>
+        <div className="mt-10 inline-flex flex-wrap items-center gap-4 border border-primary/30 bg-background/70 px-6 py-4 backdrop-blur">
+          <Clock className="h-5 w-5 text-primary" />
+          <span className="text-sm font-semibold text-foreground">Pzt - Cmt: 09:00 - 21:00</span>
+          <span className="text-foreground/30">/</span>
+          <span className="text-sm text-foreground/50">Pazar Kapalı</span>
+          <OpenBadge />
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }
@@ -531,16 +674,14 @@ function Contact() {
 function InfoRow({ Icon, title, lines, href }: { Icon: typeof Phone; title: string; lines: string[]; href?: string }) {
   const content = (
     <>
-      <div className="h-12 w-12 shrink-0 rounded-lg bg-primary/10 flex items-center justify-center">
-        <Icon className="h-5 w-5 text-primary" />
-      </div>
+      <Icon className="h-5 w-5 shrink-0 text-primary" />
       <div className="min-w-0">
-        <h3 className="font-semibold">{title}</h3>
-        {lines.map((l) => <p key={l} className="text-sm text-muted-foreground">{l}</p>)}
+        <h3 className="text-xs font-bold uppercase tracking-[0.25em] text-primary">{title}</h3>
+        {lines.map((l) => <p key={l} className="mt-1 text-sm text-foreground/80">{l}</p>)}
       </div>
     </>
   );
-  const cls = "flex gap-4 p-5 rounded-xl bg-card border border-border hover:border-primary/40 transition";
+  const cls = "flex items-start gap-3 transition-colors hover:text-primary";
   return href ? (
     <a href={href} target="_blank" rel="noreferrer" className={cls}>{content}</a>
   ) : (
@@ -569,17 +710,17 @@ function WhatsAppFab() {
         </span>
       </button>
       {show && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60" onClick={() => setShow(false)}>
-          <div className="relative w-full max-w-sm mx-4 rounded-2xl border border-border bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70" onClick={() => setShow(false)}>
+          <div className="relative mx-4 w-full max-w-sm border border-foreground/10 bg-card p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setShow(false)}
-              className="absolute right-4 top-4 p-1 rounded-md hover:bg-muted transition"
+              className="absolute right-4 top-4 p-1 text-foreground/50 transition hover:text-primary"
               aria-label="Kapat"
             >
-              <X className="h-5 w-5 text-muted-foreground" />
+              <X className="h-5 w-5" />
             </button>
-            <h3 className="text-lg font-bold text-foreground pr-8">Berberinizi Seçin</h3>
-            <p className="text-sm text-muted-foreground mt-1">Tercih ettiğiniz berberle WhatsApp üzerinden iletişime geçin.</p>
+            <h3 className="pr-8 font-display text-lg font-bold text-foreground">Berberinizi Seçin</h3>
+            <p className="mt-1 text-sm text-foreground/50">Tercih ettiğiniz berberle WhatsApp üzerinden iletişime geçin.</p>
             <div className="mt-5 flex flex-col gap-3">
               {whatsappBarbers.map((b) => (
                 <a
@@ -588,10 +729,10 @@ function WhatsAppFab() {
                   target="_blank"
                   rel="noreferrer"
                   onClick={() => setShow(false)}
-                  className="flex items-center justify-between rounded-xl border border-border bg-background px-5 py-3.5 text-sm font-semibold hover:border-primary/50 hover:bg-primary/5 transition"
+                  className="flex items-center justify-between border border-foreground/10 bg-background px-5 py-3.5 text-sm font-semibold text-foreground transition hover:border-primary hover:text-primary"
                 >
                   <span>{b.name}</span>
-                  <span className="text-xs text-muted-foreground font-medium">WhatsApp</span>
+                  <span className="text-xs font-medium text-foreground/40">WhatsApp</span>
                 </a>
               ))}
             </div>
@@ -604,14 +745,11 @@ function WhatsAppFab() {
 
 function Footer() {
   return (
-    <footer className="bg-secondary text-secondary-foreground py-10">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2">
-          <Scissors className="h-5 w-5 text-primary" />
-          <span className="font-display font-bold">Kafadar Erkek Kuaförü</span>
-        </div>
-        <p className="text-sm text-secondary-foreground/70">© 2026 Kafadar Erkek Kuaförü. Tüm hakları saklıdır.</p>
-        <a href="https://www.instagram.com/kafadarerkekkuaforu/" target="_blank" rel="noreferrer" className="hover:text-primary transition">
+    <footer className="border-t border-foreground/10 bg-background py-10">
+      <div className="mx-auto flex max-w-[1600px] flex-col items-center justify-between gap-4 px-6 sm:flex-row sm:px-10 lg:px-16">
+        <div className="font-display text-lg font-bold tracking-[0.2em] text-foreground">KAFADAR</div>
+        <p className="text-xs uppercase tracking-[0.25em] text-foreground/40">© 2026 Kafadar Erkek Kuaförü. Tüm hakları saklıdır.</p>
+        <a href="https://www.instagram.com/kafadarerkekkuaforu/" target="_blank" rel="noreferrer" className="text-foreground/50 transition hover:text-primary">
           <Instagram className="h-5 w-5" />
         </a>
       </div>
